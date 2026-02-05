@@ -18,15 +18,8 @@ jobs:
           registry-url: https://registry.npmjs.org/
           cache: 'yarn'
 
-      - name: npm  install
-        run: npm  install
-
-      - name: Yarn Setup
-        uses: DerYeger/yarn-setup-action@v1.0.1
-        with:
-          node-version: 18
-
-      - name: Build
+      # 使用 yarn 而不是 npm 保持包管理器一致
+      - name: Install dependencies
         run: yarn install
 
       - name: Build
