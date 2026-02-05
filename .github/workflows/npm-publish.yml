@@ -24,6 +24,6 @@ jobs:
         run: yarn yakumo build
 
       - name: Publish to npm
-        run: yarn publish --access public
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
