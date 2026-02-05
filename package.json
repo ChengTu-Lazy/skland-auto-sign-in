@@ -1,6 +1,6 @@
 {
   "name": "koishi-plugin-skland-auto-sign-in",
-  "description": "",
+  "description": "森空岛自动签到 Koishi 插件",
   "version": "0.0.1",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
@@ -9,14 +9,39 @@
     "dist"
   ],
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "yakumo build"
+  },
   "keywords": [
-    "chatbot",
+    "skland",
+    "arknights",
     "koishi",
-    "plugin"
+    "plugin",
+    "sign-in"
   ],
-  "devDependencies": {},
   "peerDependencies": {
-    "koishi": "^4.18.7"
+    "koishi": "^4.13.9"
+  },
+  "devDependencies": {
+    "esbuild": "^0.18.20",
+    "esbuild-register": "npm:@shigma/esbuild-register@^1.1.1",
+    "koishi": "^4.13.9",
+    "typescript": "^5.4.3",
+    "yakumo": "^1.0.0-beta.16",
+    "yakumo-esbuild": "^1.0.0-beta.6",
+    "yakumo-tsc": "^1.0.0-beta.4",
+    "yml-register": "^1.2.5"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  },
+  "koishi": {
+    "description": {
+      "zh": "森空岛自动签到插件"
+    },
+    "service": {
+      "required": [],
+      "optional": []
+    }
   }
 }
