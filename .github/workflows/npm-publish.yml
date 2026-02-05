@@ -16,9 +16,7 @@ jobs:
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
-          cache: 'yarn'
 
-      # 使用 yarn 而不是 npm 保持包管理器一致
       - name: Install dependencies
         run: yarn install
 
