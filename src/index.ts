@@ -144,8 +144,16 @@ export async function apply(ctx: Context, config: Config) {
   ctx.command('skland.add <token:string>', '绑定森空岛Token')
     .userFields(['sklandToken', 'sklandPlatform', 'sklandUserId', 'sklandGuildId'])
     .action(async ({ session }, token) => {
-      if (!session?.user) return '用户数据不存在'
-      if (!token) return '请提供Token'
+      if (!session?.user) return sendMessage(session, '用户数据不存在')
+      if (!token) {
+        return sendMessage(session, [
+          '请提供Token。获取步骤如下：',
+          '1. 登陆森空岛：https://www.skland.com/login',
+          '2. 获取token：https://web-api.skland.com/account/info/hg',
+          '   (复制返回内容 {"content":"XXX"} 中的 XXX 部分)',
+          '3. 私聊Bot或在当前会话发送（在群里记得撤回）：skland.add XXX'
+        ].join('\n'))
+      }
 
       session.user.sklandToken = token
       // 存储当前绑定的上下文信息
@@ -195,6 +203,23 @@ export async function apply(ctx: Context, config: Config) {
       } else {
         msg += '您尚未绑定 Token。'
       }
+      return sendMessage(session, msg)
+    })
+
+  // 帮助指令
+  ctx.command('skland.help', '查看森空岛签到帮助')
+    .alias('森空岛签到帮助')
+    .action(async ({ session }) => {
+      const msg = [
+        '森空岛签到助手使用说明：',
+        '1. 绑定Token：skland.add [token]',
+        '   (直接发送 skland.add 可查看详细获取教程)',
+        '2. 手动签到：skland.sign',
+        '3. 打开自动签到：skland.auto on',
+        '4. 关闭自动签到：skland.auto off',
+        '5. 查看状态：skland.status',
+        '✨自动签到结果会私聊发送给您，请确保Bot能私聊到您。',
+      ].join('\n')
       return sendMessage(session, msg)
     })
 
