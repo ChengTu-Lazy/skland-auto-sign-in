@@ -33,8 +33,8 @@ export class SklandHelper {
                 const signResults = await this.doSign(credential, did)
                 results.push(...signResults)
             } catch (error) {
-                this.logger.error(`Token签到失败: ${error}`)
-                results.push(`Token签到失败: ${error.message}`)
+                this.logger.error(`Token签到失败: ${(error as Error).message}`)
+                results.push(`Token签到失败: ${(error as Error).message}`)
             }
         }
         return results

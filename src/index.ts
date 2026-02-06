@@ -110,6 +110,7 @@ export async function apply(ctx: Context, config: Config) {
     .alias('森空岛签到')
     .userFields(['sklandToken'])
     .action(async ({ session }) => {
+      if (!session?.user) return '用户数据不存在'
       const token = session.user.sklandToken
       if (!token) {
         return '你还没有绑定森空岛Token，请使用 skland.add <token> 进行绑定。'
@@ -132,6 +133,7 @@ export async function apply(ctx: Context, config: Config) {
   ctx.command('skland.add <token:string>', '绑定森空岛Token')
     .userFields(['sklandToken'])
     .action(async ({ session }, token) => {
+      if (!session?.user) return '用户数据不存在'
       if (!token) return '请提供Token'
       session.user.sklandToken = token
       await session.user.$update()
@@ -142,6 +144,7 @@ export async function apply(ctx: Context, config: Config) {
   ctx.command('skland.auto [switch:text]', '开启/关闭自动签到 (on/off)')
     .userFields(['sklandAutoSign', 'sklandToken'])
     .action(async ({ session }, switchStr) => {
+      if (!session?.user) return '用户数据不存在'
       if (!session.user.sklandToken) {
         return '请先绑定 Token 再开启自动签到。'
       }
@@ -166,6 +169,7 @@ export async function apply(ctx: Context, config: Config) {
     .alias('签到状态')
     .userFields(['sklandToken', 'sklandAutoSign'])
     .action(async ({ session }) => {
+      if (!session?.user) return '用户数据不存在'
       const { sklandToken, sklandAutoSign } = session.user
       let msg = ''
       if (sklandToken) {
