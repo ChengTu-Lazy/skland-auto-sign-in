@@ -37,6 +37,15 @@ declare module 'koishi' {
 export async function apply(ctx: Context, config: Config) {
   const logger = new Logger(name)
 
+  // 辅助函数：根据是否私聊环境选择发送方式
+  const sendMessage = async (session: any, message: string) => {
+    if (session.isDirect) {
+      await session.bot.sendPrivateMessage(session.userId, message)
+    } else {
+      await session.send(message)
+    }
+  }
+
   // 扩展数据库 user 表
   ctx.model.extend('user', {
     sklandToken: 'text',
@@ -115,19 +124,19 @@ export async function apply(ctx: Context, config: Config) {
       if (!session?.user) return '用户数据不存在'
       const token = session.user.sklandToken
       if (!token) {
-        return '你还没有绑定森空岛Token，请使用 skland.add <token> 进行绑定。'
+        return sendMessage(session, '你还没有绑定森空岛Token，请使用 skland.add <token> 进行绑定。')
       }
 
       try {
-        await session.send('正在为您执行签到...')
+        await sendMessage(session, '正在为您执行签到...')
         const userConfig = { ...config, tokens: [token] }
         const sklandHelper = new SklandHelper(ctx, userConfig, logger)
 
         const results = await sklandHelper.doSignForAllTokens()
-        return results.join('\n')
+        return sendMessage(session, results.join('\n'))
       } catch (error) {
         logger.error('签到失败:', error)
-        return '签到失败，请检查 Token 是否过期'
+        return sendMessage(session, '签到失败，请检查 Token 是否过期')
       }
     })
 
@@ -145,7 +154,7 @@ export async function apply(ctx: Context, config: Config) {
       session.user.sklandGuildId = session.guildId
 
       await session.user.$update()
-      return 'Token已成功绑定！自动签到通知将发送至当前账号。您可以发送“森空岛签到”来签到。'
+      return sendMessage(session, 'Token已成功绑定！自动签到通知将发送至当前账号。您可以发送“森空岛签到”来签到。')
     })
 
   // 自动签到开关命令
@@ -154,21 +163,21 @@ export async function apply(ctx: Context, config: Config) {
     .action(async ({ session }, switchStr) => {
       if (!session?.user) return '用户数据不存在'
       if (!session.user.sklandToken) {
-        return '请先绑定 Token 再开启自动签到。'
+        return sendMessage(session, '请先绑定 Token 再开启自动签到。')
       }
 
       if (switchStr === 'on' || switchStr === '开启') {
         session.user.sklandAutoSign = true
         await session.user.$update()
-        return `自动签到已开启！将在每天 ${config.signTime} 执行。`
+        return sendMessage(session, `自动签到已开启！将在每天 ${config.signTime} 执行。`)
       } else if (switchStr === 'off' || switchStr === '关闭') {
         session.user.sklandAutoSign = false
         await session.user.$update()
-        return '自动签到已关闭。'
+        return sendMessage(session, '自动签到已关闭。')
       } else {
         // 如果没有参数，显示当前状态
         const state = session.user.sklandAutoSign ? '开启' : '关闭'
-        return `当前自动签到状态：${state}。\n发送 "skland.auto on" 开启，"skland.auto off" 关闭。`
+        return sendMessage(session, `当前自动签到状态：${state}。\n发送 "skland.auto on" 开启，"skland.auto off" 关闭。`)
       }
     })
 
@@ -186,7 +195,7 @@ export async function apply(ctx: Context, config: Config) {
       } else {
         msg += '您尚未绑定 Token。'
       }
-      return msg
+      return sendMessage(session, msg)
     })
 
   logger.info('森空岛签到插件已加载')

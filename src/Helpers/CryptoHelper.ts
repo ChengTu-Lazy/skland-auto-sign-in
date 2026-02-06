@@ -200,7 +200,7 @@ export class CryptoHelper {
                     if (checkResult.status === 0) {
                         this.pythonPath = cmd
                         fs.writeFileSync(this.scriptPath, PYTHON_SCRIPT)
-                        logger.info(`[CryptoHelper] 使用 Python: ${cmd}`)
+                        logger.debug(`[CryptoHelper] 使用 Python: ${cmd}`)
                         return
                     }
                 }
