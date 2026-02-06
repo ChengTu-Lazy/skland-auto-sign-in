@@ -28,6 +28,9 @@ declare module 'koishi' {
   interface User {
     sklandToken: string
     sklandAutoSign: boolean
+    sklandPlatform: string
+    sklandUserId: string
+    sklandGuildId: string
   }
 }
 
@@ -38,6 +41,9 @@ export async function apply(ctx: Context, config: Config) {
   ctx.model.extend('user', {
     sklandToken: 'text',
     sklandAutoSign: { type: 'boolean', initial: false },
+    sklandPlatform: 'string',
+    sklandUserId: 'string',
+    sklandGuildId: 'string',
   })
 
   // 自动签到核心逻辑
@@ -62,29 +68,25 @@ export async function apply(ctx: Context, config: Config) {
         const message = `[自动签到] 森空岛签到报告：\n${results.join('\n')}`
 
         // 尝试发送私聊通知
-        // 需要查找该用户的绑定信息来确定发送给哪个平台
-        const bindings = await ctx.database.get('binding', { aid: user.id })
-
-        let sent = false
-        for (const binding of bindings) {
-          const bot = ctx.bots.find(b => b.platform === binding.platform)
+        // 使用存储在 User 表中的平台信息直接发送
+        if (user.sklandPlatform && user.sklandUserId) {
+          const bot = ctx.bots.find(b => b.platform === user.sklandPlatform)
           if (bot) {
             try {
-              await bot.sendPrivateMessage(binding.pid, message)
-              sent = true
-              logger.debug(`已向用户 ${user.id} (${binding.platform}) 发送通知`)
-              break // 发送成功一个即可
+              await bot.sendPrivateMessage(user.sklandUserId, message)
+              logger.debug(`已向用户 ${user.sklandUserId} (${user.sklandPlatform}) 发送通知`)
             } catch (e) {
-              logger.warn(`向用户 ${user.id} 发送通知失败:`, e)
+              logger.warn(`向用户 ${user.sklandUserId} 发送通知失败:`, e)
             }
+          } else {
+            logger.warn(`用户 ${user.sklandUserId} 签到成功但未找到平台 ${user.sklandPlatform} 的 Bot`)
           }
-        }
-        if (!sent) {
-          logger.warn(`用户 ${user.id} 签到成功但未能发送通知 (未找到可用 Bot 或发送失败)`)
+        } else {
+          logger.warn(`用户 ${user.sklandUserId} 签到成功但缺少平台绑定信息 (Platform/UserId)`)
         }
 
       } catch (error) {
-        logger.error(`用户 ${user.id} 自动签到时发生错误:`, error)
+        logger.error(`用户 ${user.sklandUserId} 自动签到时发生错误:`, error)
       }
     }
     logger.info('自动签到任务执行完毕')
@@ -131,13 +133,19 @@ export async function apply(ctx: Context, config: Config) {
 
   // 添加Token命令
   ctx.command('skland.add <token:string>', '绑定森空岛Token')
-    .userFields(['sklandToken'])
+    .userFields(['sklandToken', 'sklandPlatform', 'sklandUserId', 'sklandGuildId'])
     .action(async ({ session }, token) => {
       if (!session?.user) return '用户数据不存在'
       if (!token) return '请提供Token'
+
       session.user.sklandToken = token
+      // 存储当前绑定的上下文信息
+      session.user.sklandPlatform = session.platform
+      session.user.sklandUserId = session.userId
+      session.user.sklandGuildId = session.guildId
+
       await session.user.$update()
-      return 'Token已成功绑定！您可以发送“森空岛签到”来签到。'
+      return 'Token已成功绑定！自动签到通知将发送至当前账号。您可以发送“森空岛签到”来签到。'
     })
 
   // 自动签到开关命令
