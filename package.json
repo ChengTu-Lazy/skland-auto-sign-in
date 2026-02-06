@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-skland-auto-sign-in",
   "description": "森空岛自动签到 Koishi 插件",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -9,12 +9,17 @@
     "dist"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChengTu-Lazy/skland-auto-sign-in.git"
+  },
   "scripts": {
-    "build": "yakumo build"
+    "build": "tsc"
   },
   "keywords": [
     "skland",
     "arknights",
+    "endfield",
     "koishi",
     "plugin",
     "sign-in"
@@ -23,13 +28,7 @@
     "koishi": "^4.13.9"
   },
   "devDependencies": {
-    "esbuild": "^0.18.20",
-    "esbuild-register": "npm:@shigma/esbuild-register@^1.1.1",
     "koishi": "^4.13.9",
-    "typescript": "^5.4.3",
-    "yakumo": "^1.0.0-beta.16",
-    "yakumo-esbuild": "^1.0.0-beta.6",
-    "yakumo-tsc": "^1.0.0-beta.4",
     "yml-register": "^1.2.5"
   },
   "dependencies": {
@@ -40,7 +39,9 @@
       "zh": "森空岛自动签到插件"
     },
     "service": {
-      "required": [],
+      "required": [
+        "database"
+      ],
       "optional": []
     }
   }
